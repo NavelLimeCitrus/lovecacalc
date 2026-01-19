@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>러브카 라이브 성공 계산기</title>
+    <style>
+      :root {
+        --primary: #ff527b;
+        --bg: #fff5f7;
+        --card-bg: #ffffff;
+        --border: #ffbdd0;
+
+        /* 색상별 선언 */
+        --c-pink: #ff3366;
+        --c-red: #ff3333;
+        --c-yellow: #ffcc00;
+        --c-green: #00cc66;
+        --c-blue: #0099ff;
+        --c-purple: #9933cc;
+        --c-all: linear-gradient(
+          90deg,
+          #ff3333,
+          #ffcc00,
+          #00cc66,
+          #0099ff,
+          #9933cc
+        );
+        --c-none: #999;
+      }
+      body {
+        font-family: "Pretendard", "Apple SD Gothic Neo", "Meiryo", "Yu Gothic",
+          sans-serif;
+        background-color: var(--bg);
+        color: #333;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+      }
+      .container {
+        background-color: var(--card-bg);
+        width: 100%;
+        max-width: 650px;
+        padding: 25px;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(255, 82, 123, 0.15);
+        border: 2px solid var(--border);
+        position: relative;
+      }
+
+      /* 언어 스위치 스타일 */
+      .lang-switch {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        gap: 5px;
+      }
+      .lang-btn {
+        border: 1px solid var(--primary);
+        background: white;
+        color: var(--primary);
+        padding: 5px 10px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        font-weight: bold;
+        transition: all 0.2s;
+      }
+      .lang-btn.active {
+        background: var(--primary);
+        color: white;
+      }
+
+      h1 {
+        color: var(--primary);
+        text-align: center;
+        font-size: 1.6rem;
+        margin-bottom: 20px;
+        margin-top: 10px;
+        line-height: 1.4;
+      }
+      h2 {
+        font-size: 1.1rem;
+        color: #444;
+        border-left: 5px solid var(--primary);
+        padding-left: 10px;
+        margin-top: 30px;
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .input-group {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      @media (max-width: 500px) {
+        .input-group {
+          grid-template-columns: repeat(
+            2,
+            1fr
+          ); /* 버튼 추가로 공간 확보를 위해 2열로 변경 */
+        }
+        .lang-switch {
+          position: static;
+          justify-content: flex-end;
+          margin-bottom: 10px;
+        }
+      }
+
+      .input-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #fff;
+        padding: 8px 5px;
+        border-radius: 8px;
+        border: 1px solid #f0f0f0;
+      }
+      .input-item label {
+        font-size: 0.8rem;
+        margin-bottom: 6px;
+        font-weight: bold;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      /* 스테퍼(버튼+인풋) 컨테이너 스타일 */
+      .stepper-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        width: 100%;
+      }
+
+      /* 입력창 스타일 */
+      .input-item input {
+        width: 40px; /* 버튼 때문에 너비 조금 줄임 */
+        padding: 5px;
+        text-align: center;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+        outline: none;
+        transition: border 0.2s;
+        /* 스피너 숨기기 */
+        -moz-appearance: textfield;
+      }
+      .input-item input::-webkit-outer-spin-button,
+      .input-item input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      .input-item input:focus {
+        border-color: var(--primary);
+        background-color: #fffbfd;
+      }
+
+      /* 증감 버튼 스타일 */
+      .step-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 1px solid #ffbdd0;
+        background-color: white;
+        color: var(--primary);
+        font-weight: bold;
+        font-size: 1.1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+        transition: background-color 0.1s;
+        padding: 0;
+        line-height: 1;
+      }
+      .step-btn:active {
+        background-color: #ffe0e9;
+      }
+      .step-btn:hover {
+        border-color: var(--primary);
+      }
+
+      /* 섹션 스타일 */
+      .section-deck {
+        background-color: #fffcf0;
+        padding: 15px;
+        border-radius: 12px;
+        border: 1px solid #ffecb3;
+      }
+      .section-existing {
+        background-color: #f0f9ff;
+        padding: 15px;
+        border-radius: 12px;
+        border: 1px solid #cceeff;
+        margin-top: 20px;
+      }
+
+      /* 4번 섹션 스타일 */
+      .section-burn {
+        background-color: #f5f5f5;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #ddd;
+        text-align: center;
+      }
+
+      /* 아이콘/텍스트 색상 클래스 */
+      .txt-pink {
+        color: var(--c-pink);
+      }
+      .txt-red {
+        color: var(--c-red);
+      }
+      .txt-yellow {
+        color: var(--c-yellow);
+      }
+      .txt-green {
+        color: var(--c-green);
+      }
+      .txt-blue {
+        color: var(--c-blue);
+      }
+      .txt-purple {
+        color: var(--c-purple);
+      }
+      .txt-all {
+        background: var(--c-all);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 900;
+        display: inline-block;
+      }
+      .heart-icon {
+        font-size: 1.1rem;
+        line-height: 1;
+      }
+      .txt-none {
+        color: var(--c-none);
+      }
+
+      .draw-section {
+        background-color: #fff0f5;
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        margin-top: 20px;
+        border: 1px dashed var(--primary);
+      }
+
+      .big-input {
+        width: 60px !important;
+        padding: 10px;
+        font-size: 1.4rem !important;
+        text-align: center;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+        margin-left: 0;
+        font-weight: bold;
+      }
+      .draw-section input.big-input {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+
+      .btn-calc {
+        width: 100%;
+        background: linear-gradient(135deg, #ff527b, #ff8ba7);
+        color: white;
+        border: none;
+        padding: 18px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border-radius: 15px;
+        cursor: pointer;
+        margin-top: 25px;
+        box-shadow: 0 4px 15px rgba(255, 82, 123, 0.3);
+        transition: transform 0.1s;
+      }
+      .btn-calc:active {
+        transform: scale(0.98);
+      }
+
+      .result-box {
+        margin-top: 10px;
+        margin-bottom: 30px;
+        text-align: center;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 15px;
+        border: 3px solid var(--primary);
+      }
+      .result-percent {
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--primary);
+        margin: 10px 0;
+        line-height: 1;
+      }
+
+      .sample-box {
+        margin-top: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        text-align: left;
+        font-size: 0.9rem;
+        border: 1px solid #ddd;
+      }
+      .sample-title {
+        font-weight: bold;
+        margin-bottom: 8px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 5px;
+        color: #555;
+      }
+      .sample-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 5px;
+      }
+      .sample-item {
+        background: white;
+        padding: 5px;
+        border-radius: 5px;
+        text-align: center;
+        border: 1px solid #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="lang-switch">
+        <button class="lang-btn active" id="btn-ko" onclick="setLanguage('ko')">
+          🇰🇷 한국어
+        </button>
+        <button class="lang-btn" id="btn-ja" onclick="setLanguage('ja')">
+          🇯🇵 日本語
+        </button>
+      </div>
+
+      <h1 data-i18n="title">🎤 러브카 라이브 성공 계산기</h1>
+
+      <div class="result-box" id="top-result-box">
+        <div style="font-size: 0.9rem; color: #666" data-i18n="res_title">
+          라이브 성공 확률 (50,000회 시뮬레이션)
+        </div>
+        <div class="result-percent" id="result-text">- %</div>
+
+        <div class="sample-box" id="sample-result-box" style="display: none">
+          <div class="sample-title" data-i18n="sample_title">
+            🎲 랜덤 1회 체크 결과 (실제로 뽑은 카드)
+          </div>
+          <div id="sample-content" class="sample-grid"></div>
+          <div
+            style="margin-top: 10px; text-align: right; font-weight: bold"
+            id="sample-success-status"
+          ></div>
+          <div
+            style="
+              margin-top: 5px;
+              text-align: right;
+              font-size: 0.8rem;
+              color: #888;
+            "
+            id="sample-burn-info"
+          ></div>
+        </div>
+      </div>
+
+      <div class="section-deck">
+        <h2>
+          <span data-i18n="sec1_title">1. 현재 덱에 남은 카드</span>
+          <span
+            >(<span data-i18n="total">Total</span>:
+            <span id="total-deck-count">0</span>)</span
+          >
+        </h2>
+        <div class="input-group">
+          <div class="input-item">
+            <label class="txt-pink"
+              ><span class="heart-icon">♥</span>
+              <span data-i18n="c_pink">분홍</span></label
+            >
+            <div class="stepper-wrapper">
+              <button class="step-btn" onclick="updateVal('d-pink', -1)">
+                -
+              </button>
+              <input
+                type="number"
+                class="deck-in"
+                id="d-pink"
+                value="0"
+                min="0"
+              />
+              <button class="step-btn" onclick="updateVal('d-pink', 1)">
+                +
+              </button>
+            </div>
+          </div>
+          <div class="input-item">
+            <label class="txt-red"
+              ><span class="heart-icon">♥</span>
+              <span data-i18n="c_red">빨강</span></label
+            >
+            <div class="stepper-wrapper">
+              <button class="step-btn" onclick="updateVal('d-red', -1)">
+                -
+              </button>
+              <input
+                type="number"
+                class="deck-in"
+                id="d-red"
+                value="0"
+                min="0"
+              />
+              <button class="step-btn" onclick="updateVal('d-red', 1)">
+                +
+              </button>
+            </div>
+          </div>
+          <div class="input-item">
+            <label class="txt-yellow"
+              ><span class="heart-icon">♥</span>
+              <span data-i18n="c_yellow">노랑</span></label
+            >
+            <div class="stepper-wrapper">
+              <button class="step-btn" onclick="updateVal('d-yellow', -1)">
+                -
+              </button>
+              <input
+                type="number"
+                class="deck-in"
+                id="d-yellow"
+                value="0"
+                min="0"
+              />
+              <button class="step-btn" onclick="updateVal('d-yellow', 1)">
+                +
+              </button>
+            </div>
+          </div>
+          <div class="input-item">
+            <label class="txt-green"
+              ><span class="heart-icon">♥</span>
+              <span data-i18n="c_green">초록</span></label
+            >
+            <div class="stepper-wrapper">
+              <button class="step-btn" onclick="updateVal('d-green', -1)">
+                -
+              </button>
+              <input
+                type="number"
+                class="deck-in"
+                id="d-green"
+                value="0"
+                min="0"
+              />
+              <button class="step-btn" onclick="updateVal('d-green', 1)">
+                +
+              </button>
+            </div>
+          </div>
+          <div class="input-item">
+            <label class="txt-blue"
+              ><span class="heart-icon">♥</span>
+              <span data-i18n="c_blue">파랑</span></label
+            >
+            <div class="stepper-wrapper">
+              <button class="step-btn" onclick="updateVal('d-blue', -1)">
+                -
+              </button>
+              <input
+                type="number"
+                class="deck-in"
+                id="d-blue"
+                value="0"
+                min="0"
+              />
+              <button class="step-btn" onclick="updateVal('d-blue', 1)">
+                +
+              </button>
+            </div>
+          </div>
+          <div class="input-item">
+            <label class="txt-purple"
+              ><span class="heart-icon">♥</span>
+              <span data-i18n="c_purple">보라</span></label
+            >
+            <div class="stepper-wrapper">
+              <button class="step-btn" onclick="updateVal('d-purple', -1)">
+                -
+              </button>
+              <input
+                type="number"
+                class="deck-in"
+                id="d-purple"
+                value="0"
+                min="0"
+              />
+              <button class="step-btn" onclick="updateVal('d-purple', 1)">
+                +
+              </button>
+            </div>
+          </div>
+          <div class="input-item">
+            <label class="txt-all"><span class="heart-icon">♥</span> ALL</label>
+            <div class="stepper-wrapper">
+              <button class="step-btn" onclick="updateVal('d-all', -1)">
+                -
+              </button>
+              <input
+                type="number"
+                class="deck-in"
+                id="d-all"
+                value="0"
+                min="0"
+              />
+              <button class="step-btn" onclick="updateVal('d-all', 1)">
+                +
+              </button>
+            </div>
+          </div>
+          <div class="input-item">
+            <label class="txt-none"
+              >💣 <span data-i18n="c_none">하트없음</span></label
+            >
+            <div class="stepper-wrapper">
+              <button class="step-btn" onclick="updateVal('d-none', -1)">
+                -
+              </button>
+              <input
+                type="number"
+                class="deck-in"
+                id="d-none"
+                value="0"
+                min="0"
+              />
+              <button class="step-btn" onclick="updateVal('d-none', 1)">
+                +
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-existing">
+        <h2>
+          <span data-i18n="sec2_title">2. 이미 가지고 있는 하트</span>
+          <span>(<span data-i18n="field">필드</span>)</span>
+        </h2>
+        <div class="input-group">
+          <div class="input-item">
+            <label class="txt-pink"
+              ><span class="heart-icon">♥</span>
+              <span data-i18n="c_pink">분홍</span></label
+            >
+            <div class="stepper-wrapper">
+              <button class="step-btn" onclick="updateVal('e-pink', -1)">
+                -
+              </button>
+              <input type="number" id="e-pink" value="0" min="0" />
+              <button class="step-btn" onclick="updateVal('e-pink', 1)">
+                +
+              </button>
+            </div>
+          </div>
+          <div class="input-item">
+            <label class="txt-red"
+              ><span class="heart-icon">♥</span>
+              <span data-i18n="c_red">빨강</span></label
+            >
+            <div class="stepper-wrapper">
+              <button class="step-btn" onclick="updateVal('e-red', -1)">
+                -
+              </button>
+              <input type="number" id="e-red" value="0" min="0" />
+              <button class="step-btn" onclick="updateVal('e-red', 1)">
+                +
+              </button>
+            </div>
+          </div>
+          <div class="input-item">
+            <label class="txt-yellow"
+              ><span class="heart-icon">♥</span>
+              <span data-i18n="c_yellow">노랑</span></label
+            >
+            <div class="stepper-wrapper">
+              <button class="step-btn" onclick="updateVal('e-yellow', -1)">
+                -
+              </button>
+              <input type="number" id="e-yellow" value="0" min="0" />
+              <button class="step-btn" onclick="updateVal('e-yellow', 1)">
+                +
+              </button>
+            </div>
+          </div>
+          <div class="input-item">
+            <label class="txt-green"
+              ><span class="heart-icon">♥</span>
+              <span data-i18n="c_green">초록</span></label
+            >
+            <div class="stepper-wrapper">
+              <button class="step-btn" onclick="updateVal('e-green', -1)">
+                -
+              </button>
+              <input type="number" id="e-green" value="0" min="0" />
+              <button class="step-btn" onclick="updateVal('e-green', 1)">
+                +
+              </button>
+            </div>
+          </div>
+          <div class="input-item">
+            <label class="txt-blue"
+              ><span class="heart-icon">♥</span>
+              <span data-i18n="c_blue">파랑</span></label
+            >
+            <div class="stepper-wrapper">
+              <button class="step-btn" onclick="updateVal('e-blue', -1)">
+                -
+              </button>
+              <input type="number" id="e-blue" value="0" min="0" />
+              <button class="step-btn" onclick="updateVal('e-blue', 1)">
+                +
+              </button>
+            </div>
+          </div>
+          <div class="input-item">
+            <label class="txt-purple"
+              ><span class="heart-icon">♥</span>
+              <span data-i18n="c_purple">보라</span></label
+            >
+            <div class="stepper-wrapper">
+              <button class="step-btn" onclick="updateVal('e-purple', -1)">
+                -
+              </button>
+              <input type="number" id="e-purple" value="0" min="0" />
+              <button class="step-btn" onclick="updateVal('e-purple', 1)">
+                +
+              </button>
+            </div>
+          </div>
+          <div class="input-item">
+            <label class="txt-all"><span class="heart-icon">♥</span> ALL</label>
+            <div class="stepper-wrapper">
+              <button class="step-btn" onclick="updateVal('e-all', -1)">
+                -
+              </button>
+              <input type="number" id="e-all" value="0" min="0" />
+              <button class="step-btn" onclick="updateVal('e-all', 1)">
+                +
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2><span data-i18n="sec3_title">3. 라이브 성공 조건 (목표)</span></h2>
+      <div class="input-group">
+        <div class="input-item">
+          <label class="txt-pink"
+            ><span class="heart-icon">♥</span>
+            <span data-i18n="c_pink">분홍</span></label
+          >
+          <div class="stepper-wrapper">
+            <button class="step-btn" onclick="updateVal('r-pink', -1)">
+              -
+            </button>
+            <input type="number" id="r-pink" value="0" min="0" />
+            <button class="step-btn" onclick="updateVal('r-pink', 1)">+</button>
+          </div>
+        </div>
+        <div class="input-item">
+          <label class="txt-red"
+            ><span class="heart-icon">♥</span>
+            <span data-i18n="c_red">빨강</span></label
+          >
+          <div class="stepper-wrapper">
+            <button class="step-btn" onclick="updateVal('r-red', -1)">-</button>
+            <input type="number" id="r-red" value="0" min="0" />
+            <button class="step-btn" onclick="updateVal('r-red', 1)">+</button>
+          </div>
+        </div>
+        <div class="input-item">
+          <label class="txt-yellow"
+            ><span class="heart-icon">♥</span>
+            <span data-i18n="c_yellow">노랑</span></label
+          >
+          <div class="stepper-wrapper">
+            <button class="step-btn" onclick="updateVal('r-yellow', -1)">
+              -
+            </button>
+            <input type="number" id="r-yellow" value="0" min="0" />
+            <button class="step-btn" onclick="updateVal('r-yellow', 1)">
+              +
+            </button>
+          </div>
+        </div>
+        <div class="input-item">
+          <label class="txt-green"
+            ><span class="heart-icon">♥</span>
+            <span data-i18n="c_green">초록</span></label
+          >
+          <div class="stepper-wrapper">
+            <button class="step-btn" onclick="updateVal('r-green', -1)">
+              -
+            </button>
+            <input type="number" id="r-green" value="0" min="0" />
+            <button class="step-btn" onclick="updateVal('r-green', 1)">
+              +
+            </button>
+          </div>
+        </div>
+        <div class="input-item">
+          <label class="txt-blue"
+            ><span class="heart-icon">♥</span>
+            <span data-i18n="c_blue">파랑</span></label
+          >
+          <div class="stepper-wrapper">
+            <button class="step-btn" onclick="updateVal('r-blue', -1)">
+              -
+            </button>
+            <input type="number" id="r-blue" value="0" min="0" />
+            <button class="step-btn" onclick="updateVal('r-blue', 1)">+</button>
+          </div>
+        </div>
+        <div class="input-item">
+          <label class="txt-purple"
+            ><span class="heart-icon">♥</span>
+            <span data-i18n="c_purple">보라</span></label
+          >
+          <div class="stepper-wrapper">
+            <button class="step-btn" onclick="updateVal('r-purple', -1)">
+              -
+            </button>
+            <input type="number" id="r-purple" value="0" min="0" />
+            <button class="step-btn" onclick="updateVal('r-purple', 1)">
+              +
+            </button>
+          </div>
+        </div>
+        <div class="input-item" style="grid-column: span 2; width: 100%">
+          <label class="txt-none" style="color: #333"
+            >🤍 <span data-i18n="c_any">무색하트</span></label
+          >
+          <div class="stepper-wrapper">
+            <button class="step-btn" onclick="updateVal('r-any', -1)">-</button>
+            <input
+              type="number"
+              id="r-any"
+              value="0"
+              min="0"
+              style="width: 50%"
+            />
+            <button class="step-btn" onclick="updateVal('r-any', 1)">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-burn" style="margin-top: 25px">
+        <label
+          for="burn-count"
+          style="
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #555;
+          "
+        >
+          <span data-i18n="sec4_title">4. 낼 라이브 카드 수 (0~3장)</span>
+        </label>
+        <div
+          style="
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+          "
+        >
+          <span style="font-size: 1.5rem">🗑️</span>
+          <div class="stepper-wrapper" style="width: auto">
+            <button class="step-btn" onclick="updateVal('burn-count', -1)">
+              -
+            </button>
+            <input
+              type="number"
+              class="big-input"
+              id="burn-count"
+              value="0"
+              min="0"
+              max="3"
+            />
+            <button class="step-btn" onclick="updateVal('burn-count', 1)">
+              +
+            </button>
+          </div>
+        </div>
+        <div style="margin-top: 5px; font-size: 0.8rem; color: #777">
+          <span data-i18n="sec4_desc"
+            >이 수만큼 덱에서 랜덤으로 카드가 제거됩니다.</span
+          >
+        </div>
+      </div>
+
+      <div class="draw-section">
+        <label
+          for="draw-count"
+          style="display: block; margin-bottom: 10px; font-weight: bold"
+        >
+          <span data-i18n="sec5_title">5. 몇 장 체크할까요?</span>
+        </label>
+        <div
+          style="
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+          "
+        >
+          <span style="font-size: 2rem">🎴</span>
+          <div class="stepper-wrapper" style="width: auto">
+            <button class="step-btn" onclick="updateVal('draw-count', -1)">
+              -
+            </button>
+            <input
+              type="number"
+              class="big-input"
+              id="draw-count"
+              value="1"
+              min="1"
+            />
+            <button class="step-btn" onclick="updateVal('draw-count', 1)">
+              +
+            </button>
+          </div>
+        </div>
+        <div style="margin-top: 5px; font-size: 0.8rem; color: #666">
+          (<span data-i18n="sec5_desc"
+            >소모된 카드를 제외한 덱에서 뽑습니다</span
+          >)
+        </div>
+      </div>
+
+      <button class="btn-calc" onclick="runSimulation()" data-i18n="btn_calc">
+        체크 및 확률 계산
+      </button>
+    </div>
+
+    <script>
+      // --- 값 변경 헬퍼 함수 (버튼용) ---
+      function updateVal(id, delta) {
+        const input = document.getElementById(id);
+        let currentVal = parseInt(input.value) || 0;
+        let min = parseInt(input.getAttribute("min")) || 0;
+        let max = input.hasAttribute("max")
+          ? parseInt(input.getAttribute("max"))
+          : 999;
+
+        let newVal = currentVal + delta;
+        if (newVal < min) newVal = min;
+        if (newVal > max) newVal = max;
+
+        input.value = newVal;
+        // 입력값이 바뀌었음을 알림 (Total 갱신 등을 위해)
+        input.dispatchEvent(new Event("input"));
+      }
+
+      // --- 다국어 처리 로직 ---
+      let currentLang = "ko"; // 기본 언어
+
+      const translations = {
+        ko: {
+          title: "🎤 러브카 라이브 성공 계산기",
+          sec1_title: "1. 현재 덱에 남은 카드",
+          total: "Total",
+          sec2_title: "2. 이미 가지고 있는 하트",
+          field: "필드",
+          sec3_title: "3. 라이브 성공 조건 (목표)",
+          sec4_title: "4. 낼 라이브 카드 수 (0~3장)",
+          sec4_desc: "이 수만큼 덱에서 랜덤으로 카드가 제거됩니다.",
+          sec5_title: "5. 몇 장 체크할까요?",
+          sec5_desc: "소모된 카드를 제외한 덱에서 뽑습니다",
+          btn_calc: "체크 및 확률 계산",
+          res_title: "라이브 성공 확률 (50,000회 시뮬레이션)",
+          sample_title: "🎲 랜덤 1회 체크 결과 (실제로 뽑은 카드)",
+
+          c_pink: "분홍",
+          c_red: "빨강",
+          c_yellow: "노랑",
+          c_green: "초록",
+          c_blue: "파랑",
+          c_purple: "보라",
+          c_none: "하트없음",
+          c_any: "무색하트",
+
+          // 내부 사용 텍스트
+          alert_min_draw: "최소 1장은 체크해야 합니다.",
+          alert_deck_short: "덱이 부족합니다! (남은 덱: {0}장 vs 필요: {1}장)",
+          res_success: "🎉 라이브 성공!",
+          res_fail: "💀 실패...",
+          burn_info: "※ 앞서 {0}장은 랜덤으로 제거되었습니다.",
+        },
+        ja: {
+          title: "🎤 ラブカライブ成功計算機",
+          sec1_title: "1. 現在の山札（デッキ）",
+          total: "合計",
+          sec2_title: "2. 獲得済みハート",
+          field: "フィールド",
+          sec3_title: "3. ライブ成功条件（目標）",
+          sec4_title: "4. 出すライブカードの枚数（0~3枚）",
+          sec4_desc: "この枚数分、山札からランダムに除外されます。",
+          sec5_title: "5. 何枚めくりますか？",
+          sec5_desc: "除外されたカードを除いた山札から引きます",
+          btn_calc: "確率を計算する",
+          res_title: "ライブ成功確率 (50,000回シミュレーション)",
+          sample_title: "🎲 ランダム1回チェック結果 (実際に引いたカード)",
+
+          c_pink: "桃",
+          c_red: "赤",
+          c_yellow: "黄",
+          c_green: "緑",
+          c_blue: "青",
+          c_purple: "紫",
+          c_none: "無し",
+          c_any: "無",
+
+          // JS 내부 사용 텍스트
+          alert_min_draw: "最低1枚はチェックする必要があります。",
+          alert_deck_short: "山札が足りません！ (残り: {0}枚 vs 必要: {1}枚)",
+          res_success: "🎉 ライブ成功！",
+          res_fail: "💀 失敗…",
+          burn_info: "※ 先に{0}枚がランダムに除外されました。",
+        },
+      };
+
+      function setLanguage(lang) {
+        currentLang = lang;
+
+        // 버튼 스타일 업데이트
+        document.getElementById("btn-ko").className =
+          lang === "ko" ? "lang-btn active" : "lang-btn";
+        document.getElementById("btn-ja").className =
+          lang === "ja" ? "lang-btn active" : "lang-btn";
+
+        // 텍스트 업데이트 (data-i18n 속성 사용)
+        const elements = document.querySelectorAll("[data-i18n]");
+        elements.forEach((el) => {
+          const key = el.getAttribute("data-i18n");
+          if (translations[lang][key]) {
+            el.innerText = translations[lang][key];
+          }
+        });
+
+        // 이미 계산된 결과가 있다면 다시 렌더링 (언어 반영을 위해)
+        const resultText = document.getElementById("result-text").innerText;
+        if (resultText !== "- %") {
+          runSimulation();
+        }
+      }
+
+      // --- 기본 로직 ---
+      const allNumberInputs = document.querySelectorAll('input[type="number"]');
+      allNumberInputs.forEach((input) => {
+        input.addEventListener("change", validateInput);
+        input.addEventListener("keyup", validateInput);
+      });
+
+      function validateInput() {
+        if (this.value < 0) this.value = 0;
+        if (
+          this.hasAttribute("max") &&
+          parseInt(this.value) > parseInt(this.getAttribute("max"))
+        ) {
+          this.value = this.getAttribute("max");
+        }
+      }
+
+      const deckInputs = document.querySelectorAll(".deck-in");
+      deckInputs.forEach((input) =>
+        input.addEventListener("input", updateDeckTotal)
+      );
+
+      function updateDeckTotal() {
+        let sum = 0;
+        deckInputs.forEach((inp) => {
+          let val = parseInt(inp.value);
+          if (val < 0) val = 0;
+          sum += val || 0;
+        });
+        document.getElementById("total-deck-count").innerText = sum;
+      }
+
+      function runSimulation() {
+        const getVal = (id) =>
+          Math.max(0, parseInt(document.getElementById(id).value) || 0);
+        const t = translations[currentLang]; // 현재 언어 팩
+
+        const deck = {
+          pink: getVal("d-pink"),
+          red: getVal("d-red"),
+          yellow: getVal("d-yellow"),
+          green: getVal("d-green"),
+          blue: getVal("d-blue"),
+          purple: getVal("d-purple"),
+          all: getVal("d-all"),
+          none: getVal("d-none"),
+        };
+        const existing = {
+          pink: getVal("e-pink"),
+          red: getVal("e-red"),
+          yellow: getVal("e-yellow"),
+          green: getVal("e-green"),
+          blue: getVal("e-blue"),
+          purple: getVal("e-purple"),
+          all: getVal("e-all"),
+        };
+        const req = {
+          pink: getVal("r-pink"),
+          red: getVal("r-red"),
+          yellow: getVal("r-yellow"),
+          green: getVal("r-green"),
+          blue: getVal("r-blue"),
+          purple: getVal("r-purple"),
+          any: getVal("r-any"),
+        };
+
+        const burnCount = getVal("burn-count");
+        const drawCount = getVal("draw-count");
+        const totalDeckSize = Object.values(deck).reduce((a, b) => a + b, 0);
+
+        if (drawCount <= 0) {
+          alert(t.alert_min_draw);
+          return;
+        }
+        if (totalDeckSize < burnCount + drawCount) {
+          let msg = t.alert_deck_short
+            .replace("{0}", totalDeckSize)
+            .replace("{1}", burnCount + drawCount);
+          alert(msg);
+          return;
+        }
+
+        let deckArray = [];
+        for (let k in deck) {
+          for (let i = 0; i < deck[k]; i++) deckArray.push(k);
+        }
+
+        const SIMULATIONS = 50000;
+        let successCount = 0;
+        let lastDrawnSample = null;
+
+        for (let i = 0; i < SIMULATIONS; i++) {
+          let totalNeeded = burnCount + drawCount;
+          let combinedPicks = partialShuffleAndDraw(
+            [...deckArray],
+            totalNeeded
+          );
+          let actualDrawn = combinedPicks.slice(burnCount);
+          let isSuccess = checkSuccess(actualDrawn, existing, req);
+
+          if (isSuccess) successCount++;
+
+          if (i === 0) {
+            lastDrawnSample = {
+              drawn: actualDrawn,
+              result: isSuccess,
+              burnedCount: burnCount,
+            };
+          }
+        }
+
+        const percent = ((successCount / SIMULATIONS) * 100).toFixed(2);
+        document.getElementById("result-text").innerText = percent + "%";
+
+        displaySample(lastDrawnSample);
+
+        // 계산 후 결과를 보기 위해 맨 위로 스크롤 이동
+        document
+          .querySelector(".container")
+          .scrollIntoView({ behavior: "smooth" });
+      }
+
+      function displaySample(sampleData) {
+        const t = translations[currentLang];
+        const box = document.getElementById("sample-result-box");
+        const content = document.getElementById("sample-content");
+        const status = document.getElementById("sample-success-status");
+        const burnInfo = document.getElementById("sample-burn-info");
+
+        box.style.display = "block";
+        content.innerHTML = "";
+
+        let counts = {};
+        sampleData.drawn.forEach((c) => {
+          counts[c] = (counts[c] || 0) + 1;
+        });
+
+        // 색상 이름 매핑 (현재 언어 기준)
+        const labelMap = {
+          pink: "♥ " + t.c_pink,
+          red: "♥ " + t.c_red,
+          yellow: "♥ " + t.c_yellow,
+          green: "♥ " + t.c_green,
+          blue: "♥ " + t.c_blue,
+          purple: "♥ " + t.c_purple,
+          all: "♥ ALL",
+          none: "💣 " + t.c_none,
+        };
+        const classMap = {
+          pink: "txt-pink",
+          red: "txt-red",
+          yellow: "txt-yellow",
+          green: "txt-green",
+          blue: "txt-blue",
+          purple: "txt-purple",
+          all: "txt-all",
+          none: "txt-none",
+        };
+
+        for (let key in counts) {
+          let div = document.createElement("div");
+          div.className = "sample-item";
+          div.innerHTML = `<span class="${classMap[key]}" style="font-weight:bold;">${labelMap[key]}</span> : ${counts[key]}`;
+          content.appendChild(div);
+        }
+
+        if (sampleData.result) {
+          status.innerHTML = `<span style="color:var(--primary);">${t.res_success}</span>`;
+        } else {
+          status.innerHTML = `<span style="color:#666;">${t.res_fail}</span>`;
+        }
+
+        if (sampleData.burnedCount > 0) {
+          burnInfo.innerText = t.burn_info.replace(
+            "{0}",
+            sampleData.burnedCount
+          );
+        } else {
+          burnInfo.innerText = "";
+        }
+      }
+
+      function partialShuffleAndDraw(arr, n) {
+        let result = [];
+        let len = arr.length;
+        for (let i = 0; i < n; i++) {
+          let r = Math.floor(Math.random() * (len - i)) + i;
+          let temp = arr[i];
+          arr[i] = arr[r];
+          arr[r] = temp;
+          result.push(arr[i]);
+        }
+        return result;
+      }
+
+      function checkSuccess(drawnCards, existing, req) {
+        let total = { ...existing };
+        drawnCards.forEach((c) => {
+          if (total[c] !== undefined) total[c]++;
+          else if (c === "all") total.all = (total.all || 0) + 1;
+        });
+
+        let availableAll = total.all;
+        let surplusColors = 0;
+
+        const colors = ["pink", "red", "yellow", "green", "blue", "purple"];
+
+        for (let c of colors) {
+          let needed = req[c];
+          let has = total[c];
+
+          if (has >= needed) {
+            surplusColors += has - needed;
+          } else {
+            let deficit = needed - has;
+            if (availableAll >= deficit) {
+              availableAll -= deficit;
+            } else {
+              return false;
+            }
+          }
+        }
+
+        if (surplusColors + availableAll >= req.any) {
+          return true;
+        }
+
+        return false;
+      }
+    </script>
+  </body>
+</html>
